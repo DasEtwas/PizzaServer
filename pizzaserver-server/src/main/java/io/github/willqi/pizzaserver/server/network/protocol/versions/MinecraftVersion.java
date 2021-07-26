@@ -15,7 +15,6 @@ import io.github.willqi.pizzaserver.server.world.blocks.types.BlockType;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class MinecraftVersion implements BlockRuntimeMapper {
 
@@ -40,6 +39,23 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
     public abstract String getVersionString();
 
     public abstract PacketRegistry getPacketRegistry();
+
+    public Set<ItemState> getItemStates() {
+        return Collections.unmodifiableSet(this.itemStates);
+    }
+
+    public NBTCompound getBiomeDefinitions() {
+        return this.biomesDefinitions;
+    }
+
+    @Override
+    public int getBlockRuntimeId(String name, NBTCompound state) {
+        try {
+            return this.blockStates.get(new Tuple<>(name, state));
+        } catch (NullPointerException exception) {
+            throw new NullPointerException("Failed to find block runtime id for a state of " + name);
+        }
+    }
 
     protected void loadBiomeDefinitions() throws IOException {
         try (NBTInputStream biomesNBTStream = new NBTInputStream(
@@ -100,6 +116,27 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
         }
     }
 
+    protected void loadRuntimeItems() throws IOException {
+        try (Reader itemStatesReader = new InputStreamReader(this.getProtocolResourceStream("runtime_item_states.json"))) {
+            JsonArray jsonItemStates = GSON.fromJson(itemStatesReader, JsonArray.class);
+
+            Set<ItemState> itemStates = new HashSet<>(jsonItemStates.size());
+            for (int i = 0; i < jsonItemStates.size(); i++) {
+                JsonObject jsonItemState = jsonItemStates.get(i).getAsJsonObject();
+
+                itemStates.add(new ItemState(
+                        jsonItemState.get("name").getAsString(),
+                        jsonItemState.get("id").getAsInt(),
+                        false));
+            }
+            this.itemStates = itemStates;
+        }
+    }
+
+    protected InputStream getProtocolResourceStream(String fileName) {
+        return Server.getInstance().getClass().getResourceAsStream("/protocol/v" + this.getProtocol() + "/" + fileName);
+    }
+
     /**
      * Creates a file and displays NBT data for all missing block states
      * Used for debugging new unimplemented block states
@@ -156,41 +193,4 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
         }
     }
 
-    protected void loadRuntimeItems() throws IOException {
-        try (Reader itemStatesReader = new InputStreamReader(this.getProtocolResourceStream("runtime_item_states.json"))) {
-            JsonArray jsonItemStates = GSON.fromJson(itemStatesReader, JsonArray.class);
-
-            Set<ItemState> itemStates = new HashSet<>(jsonItemStates.size());
-            for (int i = 0; i < jsonItemStates.size(); i++) {
-                JsonObject jsonItemState = jsonItemStates.get(i).getAsJsonObject();
-
-                itemStates.add(new ItemState(
-                        jsonItemState.get("name").getAsString(),
-                        jsonItemState.get("id").getAsInt(),
-                        false));
-            }
-            this.itemStates = itemStates;
-        }
-    }
-
-    protected InputStream getProtocolResourceStream(String fileName) {
-        return Server.getInstance().getClass().getResourceAsStream("/protocol/v" + this.getProtocol() + "/" + fileName);
-    }
-
-    @Override
-    public int getBlockRuntimeId(String name, NBTCompound state) {
-        try {
-            return this.blockStates.get(new Tuple<>(name, state));
-        } catch (NullPointerException exception) {
-            throw new NullPointerException("Failed to find block runtime id for a state of " + name);
-        }
-    }
-
-    public Set<ItemState> getItemStates() {
-        return Collections.unmodifiableSet(this.itemStates);
-    }
-
-    public NBTCompound getBiomeDefinitions() {
-        return this.biomesDefinitions;
-    }
 }
