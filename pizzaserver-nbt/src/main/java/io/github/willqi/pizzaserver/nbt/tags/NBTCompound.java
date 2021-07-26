@@ -184,6 +184,7 @@ public class NBTCompound extends NBTTag implements NBTContainer, Iterable<String
         if (this.size() > 0) {
             for (String key : this) {
                 innerContentsStringBuilder.append(key)
+                        .append('=')
                         .append(this.get(key).toString())
                         .append(", ");
             }

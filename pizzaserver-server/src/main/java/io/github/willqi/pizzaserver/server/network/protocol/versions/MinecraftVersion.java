@@ -143,7 +143,7 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
      * @param blockStates
      */
     private void logBlockStates(Map<String, LinkedHashSet<NBTCompound>> blockStates) {
-        if (this.server.getConfig().isDebugActive()) {
+        if (this.server.getConfig().isDebugActive() && this.server.getConfig().shouldLogMissingData()) {
             File protocolFolder = Paths.get(this.server.getRootDirectory(), "debug", "blocks", String.valueOf(this.getProtocol())).toFile();
             protocolFolder.mkdirs();
 
