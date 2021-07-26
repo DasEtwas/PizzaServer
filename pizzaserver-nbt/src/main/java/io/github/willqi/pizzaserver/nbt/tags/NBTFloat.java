@@ -31,6 +31,11 @@ public class NBTFloat extends NBTTag {
     }
 
     @Override
+    public String toString() {
+        return "NBTFloat(name=" + this.getName() + ", value=" + this.getValue() + ")";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof NBTFloat) {
             NBTFloat nbtFloat = (NBTFloat)obj;

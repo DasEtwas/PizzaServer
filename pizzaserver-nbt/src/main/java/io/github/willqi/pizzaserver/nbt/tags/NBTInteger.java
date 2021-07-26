@@ -31,6 +31,11 @@ public class NBTInteger extends NBTTag {
     }
 
     @Override
+    public String toString() {
+        return "NBTInteger(name=" + this.getName() + ", value=" + this.getValue() + ")";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof NBTInteger) {
             NBTInteger nbtInteger = (NBTInteger)obj;

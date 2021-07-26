@@ -39,4 +39,19 @@ public class ServerConfig {
         return this.config.getString("world-default");
     }
 
+
+    // debug
+
+    public boolean isDebugActive() {
+        return this.config.getBoolean("debug");
+    }
+
+    /**
+     * If the server should log missing data (e.g. unimplemented block states, items, etc)
+     * @return if the server should
+     */
+    public boolean shouldLogMissingData() {
+        return this.config.getBoolean("debug-log-missing-data");
+    }
+
 }

@@ -26,6 +26,11 @@ public class NBTDouble extends NBTTag {
     }
 
     @Override
+    public String toString() {
+        return "NBTDouble(name= " + this.getName() + ", value=" + this.getValue() + ")";
+    }
+
+    @Override
     public int hashCode() {
         return 31 * (int)this.value * this.name.hashCode();
     }

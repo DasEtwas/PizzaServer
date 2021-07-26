@@ -16,6 +16,7 @@ import io.github.willqi.pizzaserver.server.world.WorldManager;
 import io.github.willqi.pizzaserver.server.world.blocks.BlockRegistry;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -295,17 +296,6 @@ public class Server {
      * Called to load and setup required files/classes.
      */
     private void setupFiles() {
-
-        try {
-            new File(this.getRootDirectory() + "/plugins").mkdirs();
-            new File(this.getRootDirectory() + "/worlds").mkdirs();
-            new File(this.getRootDirectory() + "/players").mkdirs();
-            new File(this.getRootDirectory() + "/resourcepacks").mkdirs();
-            new File(this.getRootDirectory() + "/behaviorpacks").mkdirs();
-        } catch (SecurityException exception) {
-            throw new RuntimeException(exception);
-        }
-
         File propertiesFile = new File(this.getRootDirectory() + "/server.yml");
         Config config = new Config();
 
@@ -332,6 +322,19 @@ public class Server {
         this.setMotd(this.config.getMotd());
         this.setMaximumPlayerCount(this.config.getMaximumPlayers());
         this.dataPackManager.setPacksRequired(this.config.arePacksForced());
+
+        try {
+            Paths.get(this.getRootDirectory(), "plugins").toFile().mkdirs();
+            Paths.get(this.getRootDirectory(), "worlds").toFile().mkdirs();
+            Paths.get(this.getRootDirectory(), "players").toFile().mkdirs();
+            Paths.get(this.getRootDirectory(), "resourcepacks").toFile().mkdirs();
+            Paths.get(this.getRootDirectory(),"behaviorpacks").toFile().mkdirs();
+            if (this.getConfig().isDebugActive()) {
+                Paths.get(this.getRootDirectory(), "debug").toFile().mkdirs();
+            }
+        } catch (SecurityException exception) {
+            throw new RuntimeException(exception);
+        }
 
     }
 

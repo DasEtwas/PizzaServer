@@ -26,6 +26,11 @@ public class NBTByte extends NBTTag {
     }
 
     @Override
+    public String toString() {
+        return "NBTByte(name=" + this.getName() + ", value=" + this.getValue() + ")";
+    }
+
+    @Override
     public int hashCode() {
         return 31 * this.b * this.name.hashCode();
     }
@@ -38,4 +43,5 @@ public class NBTByte extends NBTTag {
         }
         return false;
     }
+
 }

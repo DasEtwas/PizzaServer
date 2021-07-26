@@ -12,11 +12,10 @@ import io.github.willqi.pizzaserver.server.Server;
 import io.github.willqi.pizzaserver.server.network.protocol.data.ItemState;
 import io.github.willqi.pizzaserver.server.world.blocks.types.BlockType;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class MinecraftVersion implements BlockRuntimeMapper {
 
@@ -42,11 +41,7 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
 
     public abstract PacketRegistry getPacketRegistry();
 
-    public Server getServer() {
-        return this.server;
-    }
-
-    public void loadBiomeDefinitions() throws IOException {
+    protected void loadBiomeDefinitions() throws IOException {
         try (NBTInputStream biomesNBTStream = new NBTInputStream(
                 new VarIntDataInputStream(this.getProtocolResourceStream("biome_definitions.nbt"))
         )) {
@@ -54,13 +49,13 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
         }
     }
 
-    public void loadBlockStates() throws IOException {
+    protected void loadBlockStates() throws IOException {
         this.blockStates.clear();
         try (NBTInputStream blockStatesNBTStream = new NBTInputStream(
                 new VarIntDataInputStream(this.getProtocolResourceStream("block_states.nbt"))
         )) {
             // keySet returns in ascending rather than descending so we have to reverse it
-            SortedMap<String, List<NBTCompound>> blockStates = new TreeMap<>(Collections.reverseOrder((fullBlockIdA, fullBlockIdB) -> {
+            SortedMap<String, LinkedHashSet<NBTCompound>> blockStates = new TreeMap<>(Collections.reverseOrder((fullBlockIdA, fullBlockIdB) -> {
                 // Runtime ids are mapped by their part b first before part a (e.g. b:b goes before b:c and a:d)
                 String blockIdA = fullBlockIdA.substring(fullBlockIdA.indexOf(":") + 1);
                 String blockIdB = fullBlockIdB.substring(fullBlockIdB.indexOf(":") + 1);
@@ -80,7 +75,7 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
 
                 String name = blockState.getString("name");
                 if (!blockStates.containsKey(name)) {
-                    blockStates.put(name, new ArrayList<>());
+                    blockStates.put(name, new LinkedHashSet<>());
                 }
 
                 NBTCompound states = blockState.getCompound("states");
@@ -88,8 +83,8 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
             }
 
             // Add custom block states
-            for (BlockType blockType : this.getServer().getBlockRegistry().getCustomTypes()) {
-                blockStates.put(blockType.getBlockId(), new ArrayList<>(blockType.getBlockStates().keySet()));
+            for (BlockType blockType : this.server.getBlockRegistry().getCustomTypes()) {
+                blockStates.put(blockType.getBlockId(), new LinkedHashSet<>(blockType.getBlockStates().keySet()));
             }
 
             // Construct runtime ids
@@ -99,10 +94,69 @@ public abstract class MinecraftVersion implements BlockRuntimeMapper {
                     this.blockStates.put(new Tuple<>(blockId, states), runtimeId++);
                 }
             }
+
+            // debug logging
+            this.logBlockStates(blockStates);
         }
     }
 
-    public void loadRuntimeItems() throws IOException {
+    /**
+     * Creates a file and displays NBT data for all missing block states
+     * Used for debugging new unimplemented block states
+     * @param blockStates
+     */
+    private void logBlockStates(Map<String, LinkedHashSet<NBTCompound>> blockStates) {
+        if (this.server.getConfig().isDebugActive()) {
+            File protocolFolder = Paths.get(this.server.getRootDirectory(), "debug", "blocks", String.valueOf(this.getProtocol())).toFile();
+            protocolFolder.mkdirs();
+
+            boolean foundMissedBlockStates = false;
+
+            for (String minecraftId : blockStates.keySet()) {
+                File blockFile = Paths.get(protocolFolder.getAbsolutePath(), minecraftId.replace(':', '_')).toFile();
+                blockFile.delete(); // delete existing log file from file system if it exists
+
+                Set<NBTCompound> missingBlockStates = new LinkedHashSet<>();
+                if (this.server.getBlockRegistry().hasBlockType(minecraftId)) {
+                    // check if existing implementation is missing any block states
+                    for (NBTCompound blockState : blockStates.get(minecraftId)) {
+                        if (this.server.getBlockRegistry().getBlockType(minecraftId).getBlockStateIndex(blockState) == -1) {
+                            missingBlockStates.add(blockState);
+                        }
+                    }
+                } else {
+                    // they don't have any block states of this type
+                    missingBlockStates.addAll(blockStates.get(minecraftId));
+                }
+
+                // Are any block states missing?
+                if (missingBlockStates.size() > 0) {
+                    foundMissedBlockStates = true;
+
+                    try (FileWriter writer = new FileWriter(blockFile)) {
+                        StringBuilder blockStatesStr = new StringBuilder();
+                        for (NBTCompound blockState : missingBlockStates) {
+                            blockStatesStr.append(blockState.toString() + "\n");
+                        }
+
+                        writer.write(
+                                "Missing block states for block id: " + minecraftId + "\n" +
+                                        blockStatesStr.toString());
+                    } catch (IOException exception) {
+                        this.server.getLogger().error("Failed to write block state file for " + minecraftId + " when logging unimplemented block states.");
+                    }
+                }
+            }
+
+            if (foundMissedBlockStates) {
+                this.server.getLogger().warn("Not all block states of v" + this.getProtocol() + " are implemented.");
+            }
+
+
+        }
+    }
+
+    protected void loadRuntimeItems() throws IOException {
         try (Reader itemStatesReader = new InputStreamReader(this.getProtocolResourceStream("runtime_item_states.json"))) {
             JsonArray jsonItemStates = GSON.fromJson(itemStatesReader, JsonArray.class);
 

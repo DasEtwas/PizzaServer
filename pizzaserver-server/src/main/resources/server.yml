@@ -5,3 +5,7 @@ player-max: 20
 player-force-packs: false
 world-chunk-radius: 8
 world-default: world
+
+# Developer tools
+debug: false
+debug-log-missing-data: false

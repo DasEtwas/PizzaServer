@@ -27,9 +27,9 @@ public class NBTListWriter<T extends NBTTag> extends NBTWriter<NBTList<T>> {
         int childrenTagId = tag.getChildrenTypeId();
 
         this.stream.writeByte(childrenTagId);
-        this.stream.writeInt(tag.getContents().length);
+        this.stream.writeInt(tag.getData().length);
 
-        for (NBTTag childTag : tag.getContents()) {
+        for (NBTTag childTag : tag.getData()) {
             switch (childrenTagId) {
                 case NBTByte.ID:
                     this.byteWriter.writeTagData((NBTByte)childTag);

@@ -34,6 +34,11 @@ public class NBTIntegerArray extends NBTTag implements Iterable<Integer> {
     }
 
     @Override
+    public String toString() {
+        return "NBTIntegerArray(name=" + this.getName() + ", value=" + Arrays.toString(this.getData()) + ")";
+    }
+
+    @Override
     public int hashCode() {
         return 31 * Arrays.hashCode(this.data) * this.name.hashCode();
     }

@@ -32,7 +32,7 @@ public class NBTList<T extends NBTTag> extends NBTTag implements NBTContainer, I
         }
     }
 
-    public T[] getContents() {
+    public T[] getData() {
         return this.list;
     }
 
@@ -64,6 +64,11 @@ public class NBTList<T extends NBTTag> extends NBTTag implements NBTContainer, I
     }
 
     @Override
+    public String toString() {
+        return "NBTList(name=" + this.getName() + ", value=" + Arrays.toString(this.getData()) + ")";
+    }
+
+    @Override
     public int hashCode() {
         return 31 * Arrays.hashCode(this.list) * this.getName().hashCode();
     }
@@ -72,7 +77,7 @@ public class NBTList<T extends NBTTag> extends NBTTag implements NBTContainer, I
     public boolean equals(Object obj) {
         if (obj instanceof NBTList) {
             NBTList<?> nbtList = (NBTList<?>)obj;
-            return Arrays.equals(nbtList.getContents(), this.getContents()) &&
+            return Arrays.equals(nbtList.getData(), this.getData()) &&
                     nbtList.getName().equals(this.getName()) &&
                     nbtList.getChildrenTypeId() == this.getChildrenTypeId();
         }

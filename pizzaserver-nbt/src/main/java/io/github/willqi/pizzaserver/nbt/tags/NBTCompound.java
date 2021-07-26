@@ -88,7 +88,7 @@ public class NBTCompound extends NBTTag implements NBTContainer, Iterable<String
     }
 
     public NBTTag[] getList(String name) {
-        return ((NBTList<?>)this.data.get(name)).getContents();
+        return ((NBTList<?>)this.data.get(name)).getData();
     }
 
     public NBTCompound setList(String name, NBTList<?> list) {
@@ -174,6 +174,23 @@ public class NBTCompound extends NBTTag implements NBTContainer, Iterable<String
     @Override
     public Iterator<String> iterator() {
         return this.data.keySet().iterator();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder innerContentsStringBuilder = new StringBuilder();
+        String innerContentsStr = "";
+
+        if (this.size() > 0) {
+            for (String key : this) {
+                innerContentsStringBuilder.append(key)
+                        .append(this.get(key).toString())
+                        .append(", ");
+            }
+            innerContentsStr = innerContentsStringBuilder.substring(0, innerContentsStringBuilder.length() - 2);  // get rid of starting ", "
+            return "NBTCompound(name=" + this.getName() + ", value=(" + innerContentsStr + "))";
+        }
+        return "NBTCompound(name=" + this.getName() + ", value=(" + innerContentsStr + "))";
     }
 
     @Override

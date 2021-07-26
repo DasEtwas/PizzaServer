@@ -43,9 +43,9 @@ public class NBTListTest {
         NBTList<NBTInteger> rebuiltList =  (NBTList<NBTInteger>)inputStream.readList();
 
         // Confirm results
-        assertEquals(1, rebuiltList.getContents()[0].getValue());
-        assertEquals(2, rebuiltList.getContents()[1].getValue());
-        assertEquals(3, rebuiltList.getContents()[2].getValue());
+        assertEquals(1, rebuiltList.getData()[0].getValue());
+        assertEquals(2, rebuiltList.getData()[1].getValue());
+        assertEquals(3, rebuiltList.getData()[2].getValue());
 
     }
 
