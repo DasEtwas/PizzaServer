@@ -142,6 +142,7 @@ public class ImplServer implements Server {
                 this.currentTps = currentTps;
                 currentTps = 0;
                 nextTpsRecording = System.nanoTime() + TimeUtils.secondsToNanoSeconds(1);
+                this.getPlayers().forEach(p -> p.sendMessage("Current TPS: " + this.currentTps + " player count: " + this.getPlayers().size()));
             }
             currentTps++;
 
