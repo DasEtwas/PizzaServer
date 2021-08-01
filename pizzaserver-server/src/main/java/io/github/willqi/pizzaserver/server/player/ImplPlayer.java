@@ -333,6 +333,9 @@ public class ImplPlayer extends BaseLivingEntity implements Player {
         this.sendNetworkChunkPublisher();   // Load chunks sent during initial login handshake
 
         this.updateVisibleChunks(null, this.chunkRadius);
+
+        this.sendPacket(new AdventureSettingsPacket(this.getId()));
+
         this.completeLogin();
     }
 
