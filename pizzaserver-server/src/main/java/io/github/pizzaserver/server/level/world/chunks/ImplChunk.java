@@ -103,10 +103,10 @@ public class ImplChunk implements Chunk {
 
     @Override
     public boolean canBeVisibleTo(Player player) {
-        return (player.getChunkRadius() + player.getLocation().getChunkX() >= this.getX()) &&
-                (player.getLocation().getChunkX() - player.getChunkRadius() <= this.getX()) &&
-                (player.getChunkRadius() + player.getLocation().getChunkZ() >= this.getZ()) &&
-                (player.getLocation().getChunkZ() - player.getChunkRadius() <= this.getZ());
+        return (player.getChunkRadius() + player.getLocation().getChunkX() >= this.getX()) && (
+                player.getLocation().getChunkX() - player.getChunkRadius() <= this.getX()) && (
+                player.getChunkRadius() + player.getLocation().getChunkZ() >= this.getZ()) && (
+                player.getLocation().getChunkZ() - player.getChunkRadius() <= this.getZ());
     }
 
     @Override
@@ -404,9 +404,9 @@ public class ImplChunk implements Chunk {
     public void tick() {
         boolean canDoLogicTick = false;
         for (Player player : this.getViewers()) {
-            int chunkDistance = (int) Math.floor(Math.sqrt(Math.pow(player.getChunk().getX() - this.getX(), 2) +
-                                                                   Math.pow(
-                                                                           player.getChunk().getZ() - this.getZ(), 2)));
+            int chunkDistance = (int) Math.floor(Math.sqrt(
+                    Math.pow(player.getChunk().getX() - this.getX(), 2) + Math.pow(
+                            player.getChunk().getZ() - this.getZ(), 2)));
             if (chunkDistance <= this.getWorld().getServer().getConfig().getChunkPlayerTickRadius()) {
                 canDoLogicTick = true;
                 break;
@@ -551,8 +551,8 @@ public class ImplChunk implements Chunk {
     public boolean equals(Object obj) {
         if (obj instanceof ImplChunk) {
             ImplChunk otherChunk = (ImplChunk) obj;
-            return (otherChunk.getX() == this.getX()) && (otherChunk.getZ() == this.getZ()) &&
-                    (otherChunk.getWorld().equals(this.getWorld()));
+            return (otherChunk.getX() == this.getX()) && (otherChunk.getZ() == this.getZ()) && (otherChunk.getWorld()
+                                                                                                          .equals(this.getWorld()));
         }
         return false;
     }
