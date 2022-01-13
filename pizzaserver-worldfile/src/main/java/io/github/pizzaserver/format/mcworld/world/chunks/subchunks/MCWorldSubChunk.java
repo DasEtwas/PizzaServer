@@ -27,6 +27,11 @@ public class MCWorldSubChunk implements BedrockSubChunk {
         int totalLayers;
 
         switch (this.subChunkVersion) {
+            case 9:
+                totalLayers = buffer.readByte();
+                int unknown = buffer.readByte();
+                //System.out.println("unknown: " + unknown);
+                break;
             case 8:
                 totalLayers = buffer.readByte();
                 break;
