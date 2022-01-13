@@ -66,7 +66,8 @@ public class ImplChunk implements Chunk {
 
     protected ImplChunk(ImplWorld world, int x, int z, BedrockChunk chunk) {
         if (chunk.getSubChunks().size() != 16) {
-            throw new IllegalArgumentException("Tried to construct chunk with only " + chunk.getSubChunks().size() + " subchunks instead of 16.");
+            throw new IllegalArgumentException(
+                    "Tried to construct chunk with only " + chunk.getSubChunks().size() + " subchunks instead of 16.");
         }
 
         this.world = world;
@@ -77,7 +78,9 @@ public class ImplChunk implements Chunk {
 
         for (NbtMap blockEntityNBT : chunk.getBlockEntities()) {
             String blockEntityId = blockEntityNBT.getString("id");
-            BlockEntityType blockEntityType = ImplServer.getInstance().getBlockEntityRegistry().getBlockEntityType(blockEntityId);
+            BlockEntityType blockEntityType = ImplServer.getInstance()
+                                                        .getBlockEntityRegistry()
+                                                        .getBlockEntityType(blockEntityId);
 
             this.addBlockEntity(blockEntityType.deserializeDisk(this.getWorld(), blockEntityNBT));
         }
@@ -100,8 +103,10 @@ public class ImplChunk implements Chunk {
 
     @Override
     public boolean canBeVisibleTo(Player player) {
-        return (player.getChunkRadius() + player.getLocation().getChunkX() >= this.getX()) && (player.getLocation().getChunkX() - player.getChunkRadius() <= this.getX())
-                && (player.getChunkRadius() + player.getLocation().getChunkZ() >= this.getZ()) && (player.getLocation().getChunkZ() - player.getChunkRadius() <= this.getZ());
+        return (player.getChunkRadius() + player.getLocation().getChunkX() >= this.getX()) &&
+                (player.getLocation().getChunkX() - player.getChunkRadius() <= this.getX()) &&
+                (player.getChunkRadius() + player.getLocation().getChunkZ() >= this.getZ()) &&
+                (player.getLocation().getChunkZ() - player.getChunkRadius() <= this.getZ());
     }
 
     @Override
@@ -115,6 +120,7 @@ public class ImplChunk implements Chunk {
     /**
      * Add this entity this chunk.
      * The entity is also spawned to any viewers of this chunk within render distance.
+     *
      * @param entity the entity to spawn
      */
     public void addEntity(ImplEntity entity) {
@@ -132,6 +138,7 @@ public class ImplChunk implements Chunk {
     /**
      * Remove this entity from this chunk.
      * The entity is also despawned from any viewers of this chunk who are no longer within render distance.
+     *
      * @param entity the entity to spawn
      */
     public void removeEntity(Entity entity) {
@@ -152,12 +159,16 @@ public class ImplChunk implements Chunk {
     }
 
     public void addBlockEntity(BlockEntity blockEntity) {
-        Vector3i blockCoordinates = Vector3i.from(blockEntity.getLocation().getX() & 15, blockEntity.getLocation().getY(), blockEntity.getLocation().getZ() & 15);
+        Vector3i blockCoordinates = Vector3i.from(
+                blockEntity.getLocation().getX() & 15, blockEntity.getLocation().getY(),
+                blockEntity.getLocation().getZ() & 15);
         this.blockEntities.put(blockCoordinates, blockEntity);
     }
 
     public void removeBlockEntity(BlockEntity blockEntity) {
-        Vector3i blockCoordinates = Vector3i.from(blockEntity.getLocation().getX() & 15, blockEntity.getLocation().getY(), blockEntity.getLocation().getZ() & 15);
+        Vector3i blockCoordinates = Vector3i.from(
+                blockEntity.getLocation().getX() & 15, blockEntity.getLocation().getY(),
+                blockEntity.getLocation().getZ() & 15);
         this.blockEntities.remove(blockCoordinates);
     }
 
@@ -175,7 +186,8 @@ public class ImplChunk implements Chunk {
     @Override
     public Block getBlock(int x, int y, int z, int layer) {
         if (y >= 256 || y < 0 || Math.abs(x) >= 16 || Math.abs(z) >= 16) {
-            throw new IllegalArgumentException("Could not get block outside chunk");
+            throw new IllegalArgumentException(
+                    "Could not get block outside chunk (x: " + x + ", y: " + ", z: " + z + ", layer: " + layer + ")");
         }
         int subChunkIndex = y / 16;
         int chunkBlockX = x & 15;
@@ -194,7 +206,8 @@ public class ImplChunk implements Chunk {
                 block.setLocation(this.getWorld(), blockCoordinates, layer);
                 return block;
             }
-            BlockPalette.Entry paletteEntry = subChunk.getLayer(layer).getBlockEntryAt(chunkBlockX, subChunkY, chunkBlockZ);
+            BlockPalette.Entry paletteEntry = subChunk.getLayer(layer)
+                                                      .getBlockEntryAt(chunkBlockX, subChunkY, chunkBlockZ);
             Block block;
             if (BlockRegistry.getInstance().hasBlock(paletteEntry.getId())) {
                 // Block id is registered
@@ -202,7 +215,10 @@ public class ImplChunk implements Chunk {
                 block.setBlockState(paletteEntry.getState());
             } else {
                 // The block id is not registered
-                this.getWorld().getServer().getLogger().warn("Could not find block type for id " + paletteEntry.getId() + ". Substituting with air");
+                this.getWorld()
+                    .getServer()
+                    .getLogger()
+                    .warn("Could not find block type for id " + paletteEntry.getId() + ". Substituting with air");
                 block = new BlockAir();
             }
             block.setLocation(this.getWorld(), blockCoordinates, layer);
@@ -243,7 +259,9 @@ public class ImplChunk implements Chunk {
         }
 
         // Add block entity if one exists for this block
-        Optional<BlockEntityType> blockEntityType = ImplServer.getInstance().getBlockEntityRegistry().getBlockEntityType(block);
+        Optional<BlockEntityType> blockEntityType = ImplServer.getInstance()
+                                                              .getBlockEntityRegistry()
+                                                              .getBlockEntityType(block);
         if (blockEntityType.isPresent()) {
             BlockEntity blockEntity = blockEntityType.get().create(block);
             this.addBlockEntity(blockEntity);
@@ -253,7 +271,8 @@ public class ImplChunk implements Chunk {
             // Update internal sub chunk
             BedrockSubChunk subChunk = this.chunk.getSubChunks().get(subChunkIndex);
             BlockLayer mainBlockLayer = subChunk.getLayer(layer);
-            BlockPalette.Entry entry = mainBlockLayer.getPalette().create(block.getBlockId(), block.getNBTState(), ServerProtocol.LATEST_BLOCK_STATES_VERSION);
+            BlockPalette.Entry entry = mainBlockLayer.getPalette()
+                                                     .create(block.getBlockId(), block.getNBTState(), ServerProtocol.LATEST_BLOCK_STATES_VERSION);
             mainBlockLayer.setBlockEntryAt(chunkBlockX, subChunkBlockY, chunkBlockZ, entry);
 
             int highestBlockY = Math.max(0, this.chunk.getHighestBlockAt(chunkBlockX, chunkBlockZ) - 1);
@@ -325,10 +344,11 @@ public class ImplChunk implements Chunk {
 
     /**
      * Send all layers of a block to the client.
+     *
      * @param player the player being sent the layers
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param z z coordinate
+     * @param x      x coordinate
+     * @param y      y coordinate
+     * @param z      z coordinate
      */
     public void sendBlock(Player player, int x, int y, int z) {
         int subChunkIndex = y / 16;
@@ -343,11 +363,12 @@ public class ImplChunk implements Chunk {
 
     /**
      * Send a layer of a block to the client.
+     *
      * @param player the player being sent the layer
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param z z coordinate
-     * @param layer layer
+     * @param x      x coordinate
+     * @param y      y coordinate
+     * @param z      z coordinate
+     * @param layer  layer
      */
     public void sendBlock(Player player, int x, int y, int z, int layer) {
         int chunkBlockX = x & 15;
@@ -356,7 +377,8 @@ public class ImplChunk implements Chunk {
         Block block = this.getBlock(chunkBlockX, y, chunkBlockZ, layer);
         UpdateBlockPacket updateBlockPacket = new UpdateBlockPacket();
         updateBlockPacket.setRuntimeId(player.getVersion().getBlockRuntimeId(block.getBlockId(), block.getNBTState()));
-        updateBlockPacket.setBlockPosition(Vector3i.from(chunkBlockX + this.getX() * 16, y, chunkBlockZ + this.getZ() * 16));
+        updateBlockPacket.setBlockPosition(Vector3i.from(
+                chunkBlockX + this.getX() * 16, y, chunkBlockZ + this.getZ() * 16));
         updateBlockPacket.setDataLayer(layer);
         updateBlockPacket.getFlags().add(UpdateBlockPacket.Flag.NETWORK);
         player.sendPacket(updateBlockPacket);
@@ -382,7 +404,9 @@ public class ImplChunk implements Chunk {
     public void tick() {
         boolean canDoLogicTick = false;
         for (Player player : this.getViewers()) {
-            int chunkDistance = (int) Math.floor(Math.sqrt(Math.pow(player.getChunk().getX() - this.getX(), 2) + Math.pow(player.getChunk().getZ() - this.getZ(), 2)));
+            int chunkDistance = (int) Math.floor(Math.sqrt(Math.pow(player.getChunk().getX() - this.getX(), 2) +
+                                                                   Math.pow(
+                                                                           player.getChunk().getZ() - this.getZ(), 2)));
             if (chunkDistance <= this.getWorld().getServer().getConfig().getChunkPlayerTickRadius()) {
                 canDoLogicTick = true;
                 break;
@@ -527,7 +551,8 @@ public class ImplChunk implements Chunk {
     public boolean equals(Object obj) {
         if (obj instanceof ImplChunk) {
             ImplChunk otherChunk = (ImplChunk) obj;
-            return (otherChunk.getX() == this.getX()) && (otherChunk.getZ() == this.getZ()) && (otherChunk.getWorld().equals(this.getWorld()));
+            return (otherChunk.getX() == this.getX()) && (otherChunk.getZ() == this.getZ()) &&
+                    (otherChunk.getWorld().equals(this.getWorld()));
         }
         return false;
     }
@@ -566,8 +591,5 @@ public class ImplChunk implements Chunk {
             Check.nullParam(this.world, "world");
             return new ImplChunk(this.world, this.x, this.z, this.chunk);
         }
-
-
     }
-
 }
