@@ -22,6 +22,18 @@ public interface Chunk extends Watchable {
     World getWorld();
 
     /**
+     * Returns the greatest possible Y-coordinate for a block (exlusive). (example: 256)
+     * @return block y
+     */
+    int getMaxBlockY();
+
+    /**
+     * Returns the lowest possible Y-coordinate for a block. (example: 0)
+     * @return block y
+     */
+    int getMinBlockY();
+
+    /**
      * Retrieve the chunk x.
      * This can be retrieved from a coordinate by dividing the x coordinate by 16
      * @return chunk x
@@ -318,7 +330,5 @@ public interface Chunk extends Watchable {
      * Stops operations of this chunk and saves it to the provider asynchronously.
      */
     void close();
-
-
 
 }

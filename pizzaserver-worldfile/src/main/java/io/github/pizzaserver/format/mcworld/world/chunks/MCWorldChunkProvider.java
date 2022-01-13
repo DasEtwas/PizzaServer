@@ -67,17 +67,18 @@ public class MCWorldChunkProvider implements BedrockChunkProvider<MCWorldChunk> 
         }
 
         // Extract subchunks
-        byte[][] subChunks = new byte[16][];
-        for (int y = 0; y < 16; y++) {
+        byte[][] subChunks = new byte[24][];
+        for (int y = -4; y < 20; y++) {
             final int subChunkY = y;
             byte[] subChunk = this.database.get(ifOverworld(
                     dimension,
                     () -> ChunkKey.SUB_CHUNK_DATA.getLevelDBKey(x, z, subChunkY),
                     () -> ChunkKey.SUB_CHUNK_DATA.getLevelDBKeyWithDimension(x, z, dimension, subChunkY)));
+
             if (subChunk == null) {
-                subChunks[y] = new byte[]{8, 0};    // empty v8 chunk
+                subChunks[y + 4] = new byte[]{9, 0, 0}; // empty v9 subchunk
             } else {
-                subChunks[y] = subChunk;
+                subChunks[y + 4] = subChunk;
             }
         }
 
@@ -167,7 +168,7 @@ public class MCWorldChunkProvider implements BedrockChunkProvider<MCWorldChunk> 
 
 
         // sub chunks
-        for (int y = 0; y < 16; y++) {
+        for (int y = -4; y < 20; y++) {
             int chunkY = y;
             ByteBuf subChunkBuffer = ByteBufAllocator.DEFAULT.ioBuffer();
             try {
@@ -188,7 +189,6 @@ public class MCWorldChunkProvider implements BedrockChunkProvider<MCWorldChunk> 
                 subChunkBuffer.release();
             }
         }
-
     }
 
     /**

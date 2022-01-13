@@ -43,9 +43,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class ImplChunk implements Chunk {
 
-    public static final int Y_MAX = 255;
-    public static final int Y_MIN = 0;
-
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final BedrockChunk chunk;
@@ -68,9 +65,9 @@ public class ImplChunk implements Chunk {
 
 
     protected ImplChunk(ImplWorld world, int x, int z, BedrockChunk chunk) {
-        if (chunk.getSubChunks().size() != 16) {
+        if (chunk.getSubChunks().size() != 24) {
             throw new IllegalArgumentException(
-                    "Tried to construct chunk with only " + chunk.getSubChunks().size() + " subchunks instead of 16.");
+                    "Tried to construct chunk with " + chunk.getSubChunks().size() + " subchunks instead of 24.");
         }
 
         this.world = world;
@@ -92,6 +89,16 @@ public class ImplChunk implements Chunk {
     @Override
     public ImplWorld getWorld() {
         return this.world;
+    }
+
+    @Override
+    public int getMaxBlockY() {
+        return this.chunk.getMaxSubChunkY() * 16;
+    }
+
+    @Override
+    public int getMinBlockY() {
+        return this.chunk.getMinSubChunkY() * 16;
     }
 
     @Override
@@ -188,7 +195,7 @@ public class ImplChunk implements Chunk {
 
     @Override
     public Block getBlock(int x, int y, int z, int layer) {
-        if (y > Y_MAX || y < Y_MIN || x > 15 || x < 0 || z > 16 || z < 0) {
+        if (y > this.getMaxBlockY() || y < this.getMinBlockY() || x > 15 || x < 0 || z > 16 || z < 0) {
             throw new IllegalArgumentException(
                     "Could not get block outside chunk (x: " + x + ", y: " + ", z: " + z + ", layer: " + layer + ")");
         }
@@ -240,7 +247,7 @@ public class ImplChunk implements Chunk {
 
     @Override
     public void setBlock(Block block, int x, int y, int z, int layer) {
-        if (y > Y_MAX || y < Y_MIN || x > 15 || x < 0 || z > 16 || z < 0) {
+        if (y > this.getMaxBlockY() || y < this.getMinBlockY() || x > 15 || x < 0 || z > 16 || z < 0) {
             throw new IllegalArgumentException("Could not change block outside chunk");
         }
         int subChunkIndex = y / 16;

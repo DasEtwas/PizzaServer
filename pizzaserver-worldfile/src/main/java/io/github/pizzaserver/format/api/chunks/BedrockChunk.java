@@ -12,6 +12,18 @@ import java.util.Set;
  */
 public interface BedrockChunk extends BedrockNetworkDiskSerializable {
 
+    /**
+     * Returns the greatest possible Y-coordinate for a subchunk (exclusive). (example: 16)
+     * @return subchunk y
+     */
+    int getMaxSubChunkY();
+
+    /**
+     * Returns the lowest possible Y-coordinate for a subchunk. (example: 0)
+     * @return subchunk y
+     */
+    int getMinSubChunkY();
+
     int getX();
 
     int getZ();

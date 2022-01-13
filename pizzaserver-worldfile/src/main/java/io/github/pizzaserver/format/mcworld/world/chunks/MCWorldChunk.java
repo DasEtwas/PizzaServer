@@ -118,6 +118,16 @@ public class MCWorldChunk implements BedrockChunk {
     }
 
     @Override
+    public int getMaxSubChunkY() {
+        return 20;
+    }
+
+    @Override
+    public int getMinSubChunkY() {
+        return -4;
+    }
+
+    @Override
     public int getX() {
         return this.x;
     }
@@ -216,8 +226,8 @@ public class MCWorldChunk implements BedrockChunk {
 
     @Override
     public BedrockSubChunk getSubChunk(int index) {
-        if (index < this.subChunks.size()) {
-            return this.subChunks.get(index);
+        if (index + 4 < this.subChunks.size()) {
+            return this.subChunks.get(index + 4);
         } else {
             return null;
         }
