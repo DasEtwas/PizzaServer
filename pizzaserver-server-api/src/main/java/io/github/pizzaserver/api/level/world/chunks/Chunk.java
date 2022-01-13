@@ -175,9 +175,9 @@ public interface Chunk extends Watchable {
     /**
      * Set a block in this chunk.
      * @param block the {@link Block} to be set here
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param z the z coordinate
+     * @param x unsigned x coordinate
+     * @param y unsigned y coordinate
+     * @param z unsigned z coordinate
      */
     default void setBlock(Block block, int x, int y, int z) {
         this.setBlock(block, x, y, z, 0);
@@ -196,9 +196,9 @@ public interface Chunk extends Watchable {
     /**
      * Set a block in a specific layer of this chunk.
      * @param block the {@link Block} block to be set here
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param z z coordinate
+     * @param x unsigned x coordinate
+     * @param y unsigned y coordinate
+     * @param z unsigned z coordinate
      * @param layer layer
      */
     void setBlock(Block block, int x, int y, int z, int layer);
